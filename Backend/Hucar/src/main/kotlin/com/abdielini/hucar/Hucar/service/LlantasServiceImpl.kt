@@ -26,8 +26,11 @@ class LlantasServiceImpl : LlantasService() {
 
 
     fun updateLlantas(id: String, llantas: Llantas): Llantas {
-        val existingLlantas = llantasRepository.findById(id)
-        llantas.id = existingLlantas.get().id
+        llantasRepository.findById(id).let {
+            if (it != null) {
+                llantas.id = it.get().id
+            }
+        }
         return llantasRepository.save(llantas)
     }
 

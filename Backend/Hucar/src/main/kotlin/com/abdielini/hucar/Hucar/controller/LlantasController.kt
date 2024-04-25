@@ -5,6 +5,10 @@ import com.abdielini.hucar.Hucar.service.LlantasServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+import java.nio.file.Files
+import java.nio.file.Paths
+
 
 @RestController
 @RequestMapping("/llantas")
@@ -25,16 +29,36 @@ class LlantasController {
     }
 
     @PostMapping
-    fun saveLlantas(@RequestBody llantas: Llantas): ResponseEntity<Llantas> {
+    fun saveLlantas(@RequestPart("llantas") llantas: Llantas, @RequestPart("photos") photos: List<MultipartFile>): ResponseEntity<Llantas> {
+        val savedPhotosPaths = savePhotos(photos, llantas.id)
+        llantas.imagenPath1 = savedPhotosPaths[0]
+        llantas.imagenPath2 = savedPhotosPaths[1]
+        llantas.imagenPath3 = savedPhotosPaths[2]
         val savedLlantas = llantasService.saveLlantas(llantas)
         return ResponseEntity.ok(savedLlantas)
     }
 
-    @PutMapping("/{id}")
-    fun updateLlantas(@PathVariable id: String, @RequestBody llantas: Llantas): ResponseEntity<Llantas> {
-        val updatedLlantas = llantasService.updateLlantas(id, llantas)
+    @PutMapping
+    fun updateLlantas(@RequestPart("llantas") llantas: Llantas, @RequestPart("photos") photos: List<MultipartFile>): ResponseEntity<Llantas> {
+        val savedPhotosPaths = savePhotos(photos, llantas.id)
+        llantas.imagenPath1 = savedPhotosPaths[0]
+        llantas.imagenPath2 = savedPhotosPaths[1]
+        llantas.imagenPath3 = savedPhotosPaths[2]
+        val updatedLlantas = llantasService.updateLlantas(llantas.id, llantas)
         return ResponseEntity.ok(updatedLlantas)
     }
+
+    fun savePhotos(photos: List<MultipartFile>, id: String): List<String> {
+        val savedPhotosPaths = mutableListOf<String>()
+        for ((index, photo) in photos.withIndex()) {
+            val fileName = "${id}_${index}"
+            val targetLocation = Paths.get("/home/abdiel/Documentos/photos/$fileName")
+            Files.copy(photo.inputStream, targetLocation)
+            savedPhotosPaths.add(fileName)
+        }
+        return savedPhotosPaths
+    }
+
 
     @DeleteMapping("/{id}")
     fun deleteLlantas(@PathVariable id: String): ResponseEntity<Void> {
