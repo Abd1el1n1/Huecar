@@ -16,4 +16,6 @@ data class Llantas(
     var imagenPath1: String?,
     var imagenPath2: String?,
     var imagenPath3: String?
-)
+) {
+    constructor() : this("", 0, "", "", null, null, null)
+}

@@ -28,16 +28,6 @@ class LlantasController {
         return llantas.let { ResponseEntity.ok(it.get()) }
     }
 
-    @PostMapping
-    fun saveLlantas(@RequestPart("llantas") llantas: Llantas, @RequestPart("photos") photos: List<MultipartFile>): ResponseEntity<Llantas> {
-        val savedPhotosPaths = savePhotos(photos, llantas.id)
-        llantas.imagenPath1 = savedPhotosPaths[0]
-        llantas.imagenPath2 = savedPhotosPaths[1]
-        llantas.imagenPath3 = savedPhotosPaths[2]
-        val savedLlantas = llantasService.saveLlantas(llantas)
-        return ResponseEntity.ok(savedLlantas)
-    }
-
     @PutMapping
     fun updateLlantas(@RequestPart("llantas") llantas: Llantas, @RequestPart("photos") photos: List<MultipartFile>): ResponseEntity<Llantas> {
         val savedPhotosPaths = savePhotos(photos, llantas.id)
@@ -48,11 +38,21 @@ class LlantasController {
         return ResponseEntity.ok(updatedLlantas)
     }
 
+    @PostMapping
+    fun saveLlantas(@RequestPart("llantas") llantas: Llantas, @RequestPart("photos") photos: List<MultipartFile>): ResponseEntity<Llantas> {
+        val savedPhotosPaths = savePhotos(photos, llantas.id)
+        llantas.imagenPath1 = savedPhotosPaths[0]
+        llantas.imagenPath2 = savedPhotosPaths[1]
+        llantas.imagenPath3 = savedPhotosPaths[2]
+        val savedLlantas = llantasService.saveLlantas(llantas)
+        return ResponseEntity.ok(savedLlantas)
+    }
+
     fun savePhotos(photos: List<MultipartFile>, id: String): List<String> {
         val savedPhotosPaths = mutableListOf<String>()
         for ((index, photo) in photos.withIndex()) {
             val fileName = "${id}_${index}"
-            val targetLocation = Paths.get("/home/abdiel/Documentos/photos/$fileName")
+            val targetLocation = Paths.get("/home/abdiel/Documents/photos/$fileName")
             Files.copy(photo.inputStream, targetLocation)
             savedPhotosPaths.add(fileName)
         }
